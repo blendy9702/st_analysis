@@ -82,18 +82,34 @@ export default function NewPage() {
         >
           <Link href="/">
             <motion.button
-              whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.15)" }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: "rgba(255,255,255,0.15)",
+              }}
               whileTap={{ scale: 0.96 }}
               className="p-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white/70 hover:text-white transition-colors"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M19 12H5M12 5l-7 7 7 7" />
               </svg>
             </motion.button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">새 분석 작성</h1>
-            <p className="text-white/50 text-sm mt-1">강점(S)·약점(W)·기회(O)·위협(T)를 각각 작성하세요</p>
+            <h1 className="text-3xl font-bold text-white tracking-tight">
+              새 분석 작성
+            </h1>
+            <p className="text-white/50 text-sm mt-1">
+              강점(S)·약점(W)·기회(O)·위협(T)를 각각 작성하세요
+            </p>
           </div>
         </motion.div>
 
@@ -112,7 +128,7 @@ export default function NewPage() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="예: 신제품 출시 전략 분석"
+              placeholder="예: 이름, 업무, 전략 분석 등"
               className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-base outline-none focus:border-white/50 focus:ring-2 focus:ring-white/10 transition-all duration-200"
             />
           </motion.div>
@@ -138,11 +154,16 @@ export default function NewPage() {
                     {field.subtitle}
                   </span>
                 </div>
-                <p className="text-white/40 text-xs mb-4">{field.description}</p>
+                <p className="text-white/40 text-xs mb-4">
+                  {field.description}
+                </p>
                 <textarea
                   value={values[field.key]}
                   onChange={(e) =>
-                    setValues((prev) => ({ ...prev, [field.key]: e.target.value }))
+                    setValues((prev) => ({
+                      ...prev,
+                      [field.key]: e.target.value,
+                    }))
                   }
                   placeholder={`${field.subtitle}(${field.letter}) 내용을 입력하세요...`}
                   rows={6}
@@ -183,7 +204,10 @@ export default function NewPage() {
             <motion.button
               type="submit"
               disabled={saving}
-              whileHover={{ scale: saving ? 1 : 1.03, backgroundColor: "rgba(255,255,255,0.28)" }}
+              whileHover={{
+                scale: saving ? 1 : 1.03,
+                backgroundColor: "rgba(255,255,255,0.28)",
+              }}
               whileTap={{ scale: saving ? 1 : 0.97 }}
               className="px-8 py-3 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white font-semibold text-sm tracking-wide shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
@@ -191,7 +215,11 @@ export default function NewPage() {
                 <span className="flex items-center gap-2">
                   <motion.span
                     animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.8,
+                      ease: "linear",
+                    }}
                     className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full"
                   />
                   저장 중...
