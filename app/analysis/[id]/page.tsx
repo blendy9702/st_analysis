@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { supabase, type StAnalysis } from "@/lib/supabase";
+import { getSupabase, type StAnalysis } from "@/lib/supabase";
 
 const quadrants = [
   {
@@ -56,6 +56,7 @@ export default function AnalysisDetailPage() {
     }
 
     async function fetchOne() {
+      const supabase = getSupabase();
       const { data, error } = await supabase
         .from("st_analyses")
         .select("*")

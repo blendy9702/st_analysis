@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 const fields = [
   {
@@ -82,6 +82,7 @@ export default function NewPage() {
     setSaving(true);
     setError(null);
 
+    const supabase = getSupabase();
     const { error: supabaseError } = await supabase.from("st_analyses").insert({
       title: title.trim(),
       so: values.so,

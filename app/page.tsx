@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase, type StAnalysis } from "@/lib/supabase";
+import { getSupabase, type StAnalysis } from "@/lib/supabase";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -28,6 +28,7 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchAnalyses() {
+      const supabase = getSupabase();
       const { data } = await supabase
         .from("st_analyses")
         .select("*")
