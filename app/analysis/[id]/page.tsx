@@ -5,41 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { getSupabase, type StAnalysis } from "@/lib/supabase";
-
-const quadrants = [
-  {
-    key: "so" as const,
-    label: "SO",
-    subtitle: "강점 × 기회",
-    color: "from-blue-500/15 to-cyan-500/8",
-    border: "border-blue-400/25",
-    accent: "text-blue-300",
-  },
-  {
-    key: "wo" as const,
-    label: "WO",
-    subtitle: "약점 × 기회",
-    color: "from-purple-500/15 to-pink-500/8",
-    border: "border-purple-400/25",
-    accent: "text-purple-300",
-  },
-  {
-    key: "st" as const,
-    label: "ST",
-    subtitle: "강점 × 위협",
-    color: "from-indigo-500/15 to-blue-500/8",
-    border: "border-indigo-400/25",
-    accent: "text-indigo-300",
-  },
-  {
-    key: "wt" as const,
-    label: "WT",
-    subtitle: "약점 × 위협",
-    color: "from-violet-500/15 to-purple-500/8",
-    border: "border-violet-400/25",
-    accent: "text-violet-300",
-  },
-];
+import { SWOT_FIELDS } from "@/lib/swot-fields";
 
 export default function AnalysisDetailPage() {
   const params = useParams();
@@ -66,7 +32,7 @@ export default function AnalysisDetailPage() {
       if (error || !data) {
         setNotFound(true);
       } else {
-        setItem(data);
+        setItem(data as StAnalysis);
       }
       setLoading(false);
     }
@@ -166,20 +132,21 @@ export default function AnalysisDetailPage() {
             transition={{ duration: 0.45 }}
             className="grid grid-cols-1 md:grid-cols-2 gap-5"
           >
-            {quadrants.map((q, i) => (
+            {SWOT_FIELDS.map((field, i) => (
               <motion.article
-                key={q.key}
+                key={field.key}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.06 * i, duration: 0.4 }}
-                className={`rounded-3xl bg-linear-to-br ${q.color} backdrop-blur-md border ${q.border} p-6`}
+                className={`rounded-3xl bg-linear-to-br ${field.detailGradient} backdrop-blur-md border ${field.detailBorder} p-6`}
               >
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className={`text-2xl font-extrabold ${q.accent}`}>{q.label}</span>
-                  <span className="text-white/55 text-sm font-medium">{q.subtitle}</span>
+                  <span className={`text-2xl font-extrabold ${field.accent}`}>{field.letter}</span>
+                  <span className="text-white/55 text-sm font-medium">{field.subtitle}</span>
+                  <span className="text-white/35 text-xs">· {field.description}</span>
                 </div>
                 <p className="text-white/75 text-sm leading-relaxed whitespace-pre-wrap">
-                  {item[q.key]?.trim() ? item[q.key] : "내용 없음"}
+                  {item[field.key]?.trim() ? item[field.key] : "내용 없음"}
                 </p>
               </motion.article>
             ))}

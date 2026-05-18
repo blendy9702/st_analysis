@@ -5,49 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { getSupabase } from "@/lib/supabase";
-
-const fields = [
-  {
-    key: "so" as const,
-    label: "SO",
-    subtitle: "강점 × 기회",
-    description: "강점을 활용해 기회를 포착하는 전략",
-    color: "from-blue-500/20 to-cyan-500/10",
-    border: "border-blue-400/30",
-    accent: "text-blue-300",
-    focus: "focus:border-blue-400/60 focus:ring-blue-400/20",
-  },
-  {
-    key: "wo" as const,
-    label: "WO",
-    subtitle: "약점 × 기회",
-    description: "약점을 보완해 기회를 살리는 전략",
-    color: "from-purple-500/20 to-pink-500/10",
-    border: "border-purple-400/30",
-    accent: "text-purple-300",
-    focus: "focus:border-purple-400/60 focus:ring-purple-400/20",
-  },
-  {
-    key: "st" as const,
-    label: "ST",
-    subtitle: "강점 × 위협",
-    description: "강점으로 위협에 대응하는 전략",
-    color: "from-indigo-500/20 to-blue-500/10",
-    border: "border-indigo-400/30",
-    accent: "text-indigo-300",
-    focus: "focus:border-indigo-400/60 focus:ring-indigo-400/20",
-  },
-  {
-    key: "wt" as const,
-    label: "WT",
-    subtitle: "약점 × 위협",
-    description: "약점과 위협을 최소화하는 방어 전략",
-    color: "from-violet-500/20 to-purple-500/10",
-    border: "border-violet-400/30",
-    accent: "text-violet-300",
-    focus: "focus:border-violet-400/60 focus:ring-violet-400/20",
-  },
-];
+import { SWOT_FIELDS } from "@/lib/swot-fields";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -69,7 +27,12 @@ const itemVariants = {
 export default function NewPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
-  const [values, setValues] = useState({ so: "", wo: "", st: "", wt: "" });
+  const [values, setValues] = useState({
+    strengths: "",
+    weaknesses: "",
+    opportunities: "",
+    threats: "",
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,10 +48,10 @@ export default function NewPage() {
     const supabase = getSupabase();
     const { error: supabaseError } = await supabase.from("st_analyses").insert({
       title: title.trim(),
-      so: values.so,
-      wo: values.wo,
-      st: values.st,
-      wt: values.wt,
+      strengths: values.strengths,
+      weaknesses: values.weaknesses,
+      opportunities: values.opportunities,
+      threats: values.threats,
     });
 
     if (supabaseError) {
@@ -130,7 +93,7 @@ export default function NewPage() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-white tracking-tight">새 분석 작성</h1>
-            <p className="text-white/50 text-sm mt-1">ST 분석 매트릭스를 작성하세요</p>
+            <p className="text-white/50 text-sm mt-1">강점(S)·약점(W)·기회(O)·위협(T)를 각각 작성하세요</p>
           </div>
         </motion.div>
 
@@ -154,14 +117,14 @@ export default function NewPage() {
             />
           </motion.div>
 
-          {/* 4개 분석 영역 */}
+          {/* SWOT 4요소 */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8"
           >
-            {fields.map((field) => (
+            {SWOT_FIELDS.map((field) => (
               <motion.div
                 key={field.key}
                 variants={itemVariants}
@@ -169,7 +132,7 @@ export default function NewPage() {
               >
                 <div className="flex items-baseline gap-2 mb-1">
                   <span className={`text-2xl font-extrabold ${field.accent}`}>
-                    {field.label}
+                    {field.letter}
                   </span>
                   <span className="text-white/60 text-sm font-medium">
                     {field.subtitle}
@@ -181,7 +144,7 @@ export default function NewPage() {
                   onChange={(e) =>
                     setValues((prev) => ({ ...prev, [field.key]: e.target.value }))
                   }
-                  placeholder={`${field.subtitle} 전략을 입력하세요...`}
+                  placeholder={`${field.subtitle}(${field.letter}) 내용을 입력하세요...`}
                   rows={6}
                   className={`w-full bg-white/5 border border-white/15 rounded-2xl px-4 py-3 text-white placeholder-white/25 text-sm outline-none resize-none transition-all duration-200 focus:ring-2 ${field.focus} leading-relaxed`}
                 />

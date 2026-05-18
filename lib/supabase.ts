@@ -20,9 +20,9 @@ export function getSupabase(): SupabaseClient {
 export interface StAnalysis {
   id: string;
   title: string;
-  so: string;
-  wo: string;
-  st: string;
-  wt: string;
+  strengths: string;
+  weaknesses: string;
+  opportunities: string;
+  threats: string;
   created_at: string;
 }

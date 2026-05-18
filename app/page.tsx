@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSupabase, type StAnalysis } from "@/lib/supabase";
+import { SWOT_FIELDS } from "@/lib/swot-fields";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -135,23 +136,19 @@ export default function HomePage() {
                         </p>
                       </div>
 
-                      {/* ST 매트릭스 미리보기 */}
+                      {/* SWOT 미리보기 */}
                       <div className="p-4 grid grid-cols-2 gap-2">
-                        {[
-                          { label: "SO", value: item.so, color: "bg-blue-500/20 border-blue-400/30" },
-                          { label: "WO", value: item.wo, color: "bg-purple-500/20 border-purple-400/30" },
-                          { label: "ST", value: item.st, color: "bg-indigo-500/20 border-indigo-400/30" },
-                          { label: "WT", value: item.wt, color: "bg-violet-500/20 border-violet-400/30" },
-                        ].map(({ label, value, color }) => (
+                        {SWOT_FIELDS.map((field) => (
                           <div
-                            key={label}
-                            className={`rounded-xl border ${color} p-3`}
+                            key={field.key}
+                            className={`rounded-xl border ${field.previewBg} p-3`}
                           >
                             <span className="text-white/80 font-bold text-xs block mb-1">
-                              {label}
+                              {field.letter}{" "}
+                              <span className="text-white/50 font-medium">{field.subtitle}</span>
                             </span>
                             <p className="text-white/60 text-xs line-clamp-3 leading-relaxed">
-                              {value || "—"}
+                              {item[field.key] || "—"}
                             </p>
                           </div>
                         ))}
