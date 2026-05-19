@@ -1,5 +1,6 @@
 const ADMIN_SESSION_KEY = "st_analysis_admin";
 const PASS_PREFIX = "st_analysis_pass_";
+const EDIT_PREFIX = "st_analysis_edit_";
 
 export const ADMIN_ID = "admin";
 export const ADMIN_PASSWORD = "1324qewr";
@@ -20,13 +21,25 @@ export function verifyAdminLogin(id: string, password: string): boolean {
 /** 메인에서 비밀번호 확인 직후 상세 1회 진입용 (페이지 로드 시 소비) */
 export function grantOneTimeAccess(id: string): void {
   sessionStorage.setItem(`${PASS_PREFIX}${id}`, "1");
+  grantEditAccess(id);
 }
 
 export function consumeOneTimeAccess(id: string): boolean {
   const key = `${PASS_PREFIX}${id}`;
   if (sessionStorage.getItem(key) !== "1") return false;
   sessionStorage.removeItem(key);
+  grantEditAccess(id);
   return true;
+}
+
+/** 열람 인증 후 수정 허용 (세션 유지) */
+export function grantEditAccess(id: string): void {
+  sessionStorage.setItem(`${EDIT_PREFIX}${id}`, "1");
+}
+
+export function hasEditAccess(id: string): boolean {
+  if (typeof window === "undefined") return false;
+  return isAdminSession() || sessionStorage.getItem(`${EDIT_PREFIX}${id}`) === "1";
 }
 
 export async function hashPassword(password: string): Promise<string> {

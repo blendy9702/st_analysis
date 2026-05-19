@@ -8,6 +8,8 @@ import { getSupabase, type StAnalysis } from "@/lib/supabase";
 import { SWOT_FIELDS } from "@/lib/swot-fields";
 import {
   consumeOneTimeAccess,
+  grantEditAccess,
+  hasEditAccess,
   isAdminSession,
   promptAndVerifyAnalysisPassword,
 } from "@/lib/auth";
@@ -63,6 +65,12 @@ export default function AnalysisDetailPage() {
       setIsAdmin(admin);
 
       if (admin) {
+        grantEditAccess(id);
+        setUnlocked(true);
+        return;
+      }
+
+      if (hasEditAccess(id)) {
         setUnlocked(true);
         return;
       }
@@ -83,6 +91,7 @@ export default function AnalysisDetailPage() {
         return;
       }
 
+      grantEditAccess(id);
       setUnlocked(true);
     }
 
@@ -158,6 +167,18 @@ export default function AnalysisDetailPage() {
               </>
             ) : null}
           </div>
+          {canViewContent && item && (
+            <Link href={`/analysis/${item.id}/edit`}>
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
+                whileTap={{ scale: 0.97 }}
+                className="shrink-0 px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-md border border-white/25 text-white text-sm font-medium"
+              >
+                수정하기
+              </motion.button>
+            </Link>
+          )}
         </motion.div>
 
         {loading || !canViewContent ? (
