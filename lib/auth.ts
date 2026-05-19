@@ -42,6 +42,11 @@ export function hasEditAccess(id: string): boolean {
   return isAdminSession() || sessionStorage.getItem(`${EDIT_PREFIX}${id}`) === "1";
 }
 
+export function revokeAnalysisAccess(id: string): void {
+  sessionStorage.removeItem(`${EDIT_PREFIX}${id}`);
+  sessionStorage.removeItem(`${PASS_PREFIX}${id}`);
+}
+
 export async function hashPassword(password: string): Promise<string> {
   const data = new TextEncoder().encode(`${password}:st_analysis`);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -61,13 +66,14 @@ export async function verifyAnalysisPassword(
 export async function promptAndVerifyAnalysisPassword(
   title: string,
   passwordHash: string,
+  action = "상세 보기",
 ): Promise<boolean> {
   if (!passwordHash) {
     window.alert("비밀번호가 설정되지 않은 항목입니다. 접근할 수 없습니다.");
     return false;
   }
 
-  const password = window.prompt(`"${title}" 상세 보기\n비밀번호를 입력하세요.`);
+  const password = window.prompt(`"${title}" ${action}\n비밀번호를 입력하세요.`);
   if (password === null) return false;
   if (!password.trim()) {
     window.alert("비밀번호를 입력해주세요.");
@@ -81,4 +87,22 @@ export async function promptAndVerifyAnalysisPassword(
   }
 
   return true;
+}
+
+export async function promptConfirmAndVerifyDelete(
+  title: string,
+  passwordHash: string,
+  skipPassword: boolean,
+): Promise<boolean> {
+  if (
+    !window.confirm(
+      `"${title}" 분석을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.`,
+    )
+  ) {
+    return false;
+  }
+
+  if (skipPassword) return true;
+
+  return promptAndVerifyAnalysisPassword(title, passwordHash, "삭제");
 }

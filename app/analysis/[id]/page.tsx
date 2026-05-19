@@ -12,6 +12,8 @@ import {
   hasEditAccess,
   isAdminSession,
   promptAndVerifyAnalysisPassword,
+  promptConfirmAndVerifyDelete,
+  revokeAnalysisAccess,
 } from "@/lib/auth";
 
 export default function AnalysisDetailPage() {
@@ -26,6 +28,7 @@ export default function AnalysisDetailPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -100,6 +103,30 @@ export default function AnalysisDetailPage() {
 
   const canViewContent = isAdmin || unlocked;
 
+  const handleDelete = async () => {
+    if (!item || deleting) return;
+
+    const ok = await promptConfirmAndVerifyDelete(
+      item.title,
+      item.password_hash ?? "",
+      isAdmin,
+    );
+    if (!ok) return;
+
+    setDeleting(true);
+    const supabase = getSupabase();
+    const { error } = await supabase.from("st_analyses").delete().eq("id", id);
+
+    if (error) {
+      window.alert("삭제 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setDeleting(false);
+      return;
+    }
+
+    revokeAnalysisAccess(id);
+    router.replace("/");
+  };
+
   if (accessDenied) {
     return null;
   }
@@ -168,16 +195,28 @@ export default function AnalysisDetailPage() {
             ) : null}
           </div>
           {canViewContent && item && (
-            <Link href={`/analysis/${item.id}/edit`}>
+            <div className="flex shrink-0 items-center gap-2">
+              <Link href={`/analysis/${item.id}/edit`}>
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-md border border-white/25 text-white text-sm font-medium"
+                >
+                  수정하기
+                </motion.button>
+              </Link>
               <motion.button
                 type="button"
-                whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
-                whileTap={{ scale: 0.97 }}
-                className="shrink-0 px-5 py-2.5 rounded-xl bg-white/15 backdrop-blur-md border border-white/25 text-white text-sm font-medium"
+                disabled={deleting}
+                onClick={handleDelete}
+                whileHover={{ scale: deleting ? 1 : 1.05, backgroundColor: "rgba(239,68,68,0.25)" }}
+                whileTap={{ scale: deleting ? 1 : 0.97 }}
+                className="px-5 py-2.5 rounded-xl bg-rose-500/15 backdrop-blur-md border border-rose-400/30 text-rose-200 text-sm font-medium disabled:opacity-50"
               >
-                수정하기
+                {deleting ? "삭제 중..." : "삭제하기"}
               </motion.button>
-            </Link>
+            </div>
           )}
         </motion.div>
 
