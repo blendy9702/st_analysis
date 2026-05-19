@@ -25,4 +25,5 @@ export interface StAnalysis {
   opportunities: string;
   threats: string;
   created_at: string;
+  password_hash?: string;
 }

@@ -1,18 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { getSupabase, type StAnalysis } from "@/lib/supabase";
 import { SWOT_FIELDS } from "@/lib/swot-fields";
+import {
+  consumeOneTimeAccess,
+  isAdminSession,
+  promptAndVerifyAnalysisPassword,
+} from "@/lib/auth";
 
 export default function AnalysisDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
+  const accessCheckedRef = useRef(false);
+
   const [item, setItem] = useState<StAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -39,6 +50,50 @@ export default function AnalysisDetailPage() {
 
     fetchOne();
   }, [id]);
+
+  useEffect(() => {
+    if (loading || notFound || !item || accessCheckedRef.current) return;
+    accessCheckedRef.current = true;
+
+    async function verifyAccess() {
+      const current = item;
+      if (!current) return;
+
+      const admin = isAdminSession();
+      setIsAdmin(admin);
+
+      if (admin) {
+        setUnlocked(true);
+        return;
+      }
+
+      if (consumeOneTimeAccess(id)) {
+        setUnlocked(true);
+        return;
+      }
+
+      const ok = await promptAndVerifyAnalysisPassword(
+        current.title,
+        current.password_hash ?? "",
+      );
+
+      if (!ok) {
+        setAccessDenied(true);
+        router.replace("/");
+        return;
+      }
+
+      setUnlocked(true);
+    }
+
+    verifyAccess();
+  }, [loading, notFound, item, id, router]);
+
+  const canViewContent = isAdmin || unlocked;
+
+  if (accessDenied) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-indigo-900 via-purple-900 to-blue-900">
@@ -79,7 +134,7 @@ export default function AnalysisDetailPage() {
           </Link>
           <div className="flex-1 min-w-0">
             <p className="text-white/45 text-sm mb-1">상세 보기</p>
-            {loading ? (
+            {loading || !canViewContent ? (
               <div className="h-9 w-48 rounded-lg bg-white/10 animate-pulse" />
             ) : item ? (
               <>
@@ -95,18 +150,26 @@ export default function AnalysisDetailPage() {
                     minute: "2-digit",
                   })}
                 </p>
+                {isAdmin && (
+                  <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs">
+                    어드민 열람
+                  </span>
+                )}
               </>
             ) : null}
           </div>
         </motion.div>
 
-        {loading ? (
-          <div className="flex justify-center py-24">
+        {loading || !canViewContent ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
               className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full"
             />
+            {!loading && !canViewContent && (
+              <p className="text-white/50 text-sm">비밀번호 확인 중...</p>
+            )}
           </div>
         ) : notFound || !item ? (
           <motion.div

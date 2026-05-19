@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { getSupabase } from "@/lib/supabase";
 import { SWOT_FIELDS } from "@/lib/swot-fields";
+import { hashPassword } from "@/lib/auth";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,19 +43,35 @@ export default function NewPage() {
       setError("제목을 입력해주세요.");
       return;
     }
+
+    const password = window.prompt(
+      "이 분석을 열람할 비밀번호를 입력하세요.\n(상세 보기 시 동일한 비밀번호가 필요합니다)",
+    );
+    if (password === null) return;
+    if (!password.trim()) {
+      setError("비밀번호를 입력해주세요.");
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
+    const passwordHash = await hashPassword(password.trim());
     const supabase = getSupabase();
-    const { error: supabaseError } = await supabase.from("st_analyses").insert({
-      title: title.trim(),
-      strengths: values.strengths,
-      weaknesses: values.weaknesses,
-      opportunities: values.opportunities,
-      threats: values.threats,
-    });
+    const { data, error: supabaseError } = await supabase
+      .from("st_analyses")
+      .insert({
+        title: title.trim(),
+        strengths: values.strengths,
+        weaknesses: values.weaknesses,
+        opportunities: values.opportunities,
+        threats: values.threats,
+        password_hash: passwordHash,
+      })
+      .select("id")
+      .single();
 
-    if (supabaseError) {
+    if (supabaseError || !data) {
       setError("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
       setSaving(false);
       return;
